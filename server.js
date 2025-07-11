@@ -20,7 +20,11 @@ connectDB();
 const app = express();
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: ['http://localhost:8888', 'https://frolicking-sunburst-228e7b.netlify.app'],
+  credentials: true, // Only if you're using cookies or auth headers
+}));
+
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'frontend'))); 
 // API routes
