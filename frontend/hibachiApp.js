@@ -1,3 +1,5 @@
+// hibachiApp.js
+
 import { logout, initAuthHandlers } from './modules/auth.js';
 import { fetchHabits, markHabitDone, unmarkHabitDone } from './modules/habits.js';
 import { renderChartForHabit, renderStreakChartForHabit } from './modules/chart.js';
@@ -5,6 +7,11 @@ import { openEditModal, closeEditModal, submitEditForm } from './modules/modal.j
 import { toggleDarkMode, applySavedTheme } from './modules/theme.js';
 import { isTokenExpired } from './modules/authHelpers.js';
 import { showSpinner, hideSpinner } from './modules/utils.js';
+
+// ✅ Set base API URL for dev vs production
+const BASE_API_URL = window.location.hostname === 'localhost'
+  ? 'http://localhost:5000'
+  : 'https://hibachiapp.onrender.com';
 
 // Exported stateful variables
 export let currentEditingHabitId = null;
@@ -80,7 +87,7 @@ function onHabitListClick(e) {
     const habitId = e.target.dataset.id;
     const token = localStorage.getItem('token');
 
-    fetch(`/api/habits/${habitId}`, {
+    fetch(`${BASE_API_URL}/api/habits/${habitId}`, {
       method: 'DELETE',
       headers: { Authorization: `Bearer ${token}` },
     })
@@ -123,7 +130,7 @@ document.addEventListener('DOMContentLoaded', () => {
     e.preventDefault();
 
     const title = e.target.title.value.trim();
-    const goal = e.target.description.value.trim(); // Match HTML name
+    const goal = e.target.description.value.trim();
     const token = localStorage.getItem('token');
     const spinner = document.getElementById('spinner');
 
@@ -135,7 +142,7 @@ document.addEventListener('DOMContentLoaded', () => {
     spinner.style.display = 'block';
 
     try {
-      const res = await fetch('/api/habits', {
+      const res = await fetch(`${BASE_API_URL}/api/habits`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -165,37 +172,35 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('registerForm')?.addEventListener('submit', async (e) => {
     e.preventDefault();
     showSpinner();
-  
+
     const username = e.target.username.value.trim();
     const email = e.target.email.value.trim();
     const password = e.target.password.value;
     const messageEl = document.getElementById('registerMessage');
-  
+
     if (messageEl) {
       messageEl.textContent = 'Creating account...';
       messageEl.style.color = 'black';
     }
-  
+
     try {
-      const res = await fetch('/api/auth/register', {
+      const res = await fetch(`${BASE_API_URL}/api/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, email, password })
       });
-  
+
       const data = await res.json();
-  
+
       if (!res.ok) {
         messageEl.textContent = data.message || 'Registration failed';
         messageEl.style.color = 'red';
         return;
       }
-  
-      // Do not auto-login — just prompt to verify
+
       messageEl.textContent = '✅ Please check your email to verify your account before logging in.';
       messageEl.style.color = 'green';
-  
-      e.target.reset(); // Clear form
+      e.target.reset();
     } catch (err) {
       messageEl.textContent = 'Server error. Please try again.';
       messageEl.style.color = 'red';
@@ -203,14 +208,14 @@ document.addEventListener('DOMContentLoaded', () => {
       hideSpinner();
     }
   });
-  
+
   // Resend Verification
   document.getElementById('resendBtn')?.addEventListener('click', async () => {
     const email = prompt('Enter your email to resend verification:');
     if (!email) return;
 
     try {
-      const res = await fetch('/api/auth/resend', {
+      const res = await fetch(`${BASE_API_URL}/api/auth/resend`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email })

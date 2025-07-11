@@ -1,57 +1,104 @@
-import dotenv from 'dotenv';
-dotenv.config();
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HibachiApp</title>
 
-import express from 'express';
-import cors from 'cors';
-import path from 'path';
-import { fileURLToPath } from 'url';
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-import connectDB from './config/database.js';
-import authRoutes from './routes/authRoutes.js';
-import habitRoutes from './routes/habitRoutes.js';
-import { sendVerificationEmail } from './utils/emailTemplates.js';
+  <!-- Toastify CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css" />
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+  <!-- App Styles -->
+  <link rel="stylesheet" href="styles.css" />
 
-// Connect to MongoDB
-connectDB();
+  <!-- Toastify JS -->
+  <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 
-const app = express();
+  <style>
+    .hidden { display: none; }
+    .dark body { background: #121212; color: #f0f0f0; }
+    .dark .modal-content { background: #1e1e1e; color: #fff; }
+    button { cursor: pointer; }
+    .spinner { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); }
+  </style>
+</head>
 
-// Middleware
-app.use(cors());
-app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public'))); // serves index.html by default
+<body>
+  <!-- Dark Mode Toggle -->
+  <button id="toggleDarkModeBtn" aria-label="Toggle dark mode" style="background: none; border: none; font-size: 1.5rem;">
+    <span id="darkModeIcon">🌙</span>
+  </button>
 
-// API Routes
-app.use('/api/auth', authRoutes);
-app.use('/api/habits', habitRoutes);
+  <h1>HibachiApp</h1>
 
-// Optional email test route
-app.get('/test-email', async (req, res) => {
-  try {
-    await sendVerificationEmail('iordyecalvin@gmail.com', 'test-token-123');
-    res.send('✅ Test email sent!');
-  } catch (err) {
-    console.error('❌ Failed to send test email:', err);
-    res.status(500).send('❌ Failed to send email');
-  }
-});
+  <!-- Spinner -->
+  <div id="spinner" class="spinner hidden">Loading...</div>
 
-// Global error handler
-app.use((err, req, res, next) => {
-  console.error('[ERROR]', err.stack);
-  res.status(500).json({ message: 'Something went wrong!' });
-});
+  <!-- Authentication Section -->
+  <div id="authSection">
+    <div class="login-container">
+      <h2>Login</h2>
+      <form id="loginForm">
+        <input type="email" name="email" placeholder="Email" required />
+        <input type="password" name="password" placeholder="Password" required />
+        <a href="/forgotpassword" class="forgot-link">Forgot password?</a>
+        <button type="submit">Login</button>
+      </form>
+    </div>
 
-// Trust proxy for production (Render, HTTPS, etc.)
-if (process.env.NODE_ENV === 'production') {
-  app.set('trust proxy', 1);
-}
+    <p>Didn't receive an email? <button id="resendBtn">Resend</button></p>
+    <p id="loginStatus"></p>
 
-// Start server
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-});
+    <div class="register-container">
+      <h2>Register</h2>
+      <form id="registerForm">
+        <input type="text" name="username" placeholder="Username" required />
+        <input type="email" name="email" id="registerEmail" placeholder="Email" required />
+        <input type="password" name="password" placeholder="Password" required />
+        <button type="submit">Sign Up</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Main App UI -->
+  <div id="mainApp" style="display: none;">
+    <button id="logoutBtn">Logout</button>
+
+    <label for="habitSelect">View Progress For:</label>
+    <select id="habitSelect">
+      <option value="">-- Select a habit --</option>
+    </select>
+
+    <label for="dateRange">Show data for last:</label>
+    <select id="dateRange">
+      <option value="7">7 days</option>
+      <option value="14">14 days</option>
+      <option value="30" selected>30 days</option>
+    </select>
+
+    <canvas id="habitChart" width="400" height="200"></canvas>
+
+    <h2>Create a New Habit</h2>
+    <form id="habitForm">
+      <input type="text" id="title" placeholder="Habit title" required />
+      <input type="text" id="description" placeholder="Description" required />
+      <button type="submit">Add Habit</button>
+    </form>
+
+    <h2>Your Habits</h2>
+    <div id="habitList" class="habit-list"></div>
+
+    <h3>Streak Progress (last 7 days)</h3>
+    <canvas id="streakChart" width="400" height="200"></canvas>
+  </div>
+
+  <!-- Edit Habit Modal -->
+  <div id="editHabitModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="editHabitTitle">
+    <div class="modal-content" tabindex="-1">
+      <h2 id="editHabitTitle">Edit Habit</h2>
+      <form id="editHabitForm">
+        <label for="habitName">Habit Name</label>
+        <input type="text" id="h
