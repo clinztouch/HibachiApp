@@ -170,23 +170,29 @@
       const loginContainer = document.querySelector('.login-container');
       const registerContainer = document.querySelector('.register-container');
       const resendWrapper = document.getElementById('resendWrapper');
-
+      const authWrapper = document.querySelector('.auth-wrapper'); // New
+  
       toggleBtn?.addEventListener('click', () => {
         const isLoginVisible = !loginContainer.classList.contains('hidden');
         loginContainer.classList.toggle('hidden', isLoginVisible);
         registerContainer.classList.toggle('hidden', !isLoginVisible);
         toggleBtn.textContent = isLoginVisible ? 'Create an account' : 'Switch to Login';
-
+  
         if (resendWrapper) {
           resendWrapper.style.display = isLoginVisible ? 'block' : 'none';
         }
+  
+        // Add or remove the .login-view class
+        if (authWrapper) {
+          authWrapper.classList.toggle('login-view', !isLoginVisible);
+        }
       });
-
-      // Show resend wrapper if login is initially visible
+  
+      // Initial state
       if (!loginContainer.classList.contains('hidden') && resendWrapper) {
         resendWrapper.style.display = 'block';
       }
     });
-  </script>
+  </script>  
 </body>
 </html>

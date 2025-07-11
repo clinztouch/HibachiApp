@@ -720,3 +720,8 @@ body {
 #resendBtn:hover {
   background-color: #2980b9;
 }
+
+/* Hide the toggle button when login is visible */
+.auth-wrapper.login-view #toggleFormBtn {
+  display: none;
+}
