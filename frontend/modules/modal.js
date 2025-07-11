@@ -1,6 +1,6 @@
 import { trapFocus, releaseFocusTrap } from './accessibility.js';
 import { authFetch } from './api.js';
-
+import { API_BASE } from './config.js';
 
 const modal = document.getElementById('editHabitModal');
 const form = document.getElementById('editHabitForm');
@@ -32,14 +32,19 @@ export async function submitEditForm(e) {
   const updatedName = nameInput.value.trim();
   const updatedFrequency = frequencySelect.value;
   const habitId = window.currentEditingHabitId;
-  const token = localStorage.getItem('token');
 
   if (!habitId || !updatedName) return;
 
   try {
-    const response = await authFetch('/api/habits', {
-      method: 'POST',
-      body: JSON.stringify({ name: newHabitName }),
+    const response = await authFetch(`${API_BASE}/api/habits/${habitId}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        title: updatedName,
+        goal: updatedFrequency
+      })
     });
 
     if (!response.ok) {
@@ -49,7 +54,7 @@ export async function submitEditForm(e) {
 
     closeEditModal();
     if (typeof window.fetchHabits === 'function') {
-      await window.fetchHabits(); // trigger re-render
+      await window.fetchHabits(); // Refresh list
     }
   } catch (err) {
     console.error('Error updating habit:', err);

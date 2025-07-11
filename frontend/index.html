@@ -31,6 +31,10 @@
   <button id="toggleDarkModeBtn" aria-label="Toggle dark mode" style="background: none; border: none; font-size: 1.5rem;">
     <span id="darkModeIcon">🌙</span>
   </button>
+<!-- Global Spinner -->
+<div id="globalSpinner" class="spinner-overlay hidden">
+  <div class="spinner"></div>
+</div>
 
   <h1>HibachiApp</h1>
 
@@ -101,4 +105,33 @@
       <h2 id="editHabitTitle">Edit Habit</h2>
       <form id="editHabitForm">
         <label for="habitName">Habit Name</label>
-        <input type="text" id="h
+        <input type="text" id="habitName" name="habitName" required />
+
+        <label for="habitFrequency">Frequency</label>
+        <select id="habitFrequency" name="habitFrequency">
+          <option value="daily">Daily</option>
+          <option value="weekly">Weekly</option>
+        </select>
+
+        <div class="modal-actions">
+          <button type="submit">Save</button>
+          <button type="button" id="cancelEdit">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Confirm Modal -->
+  <div id="confirmModal" class="modal hidden">
+    <div class="modal-content">
+      <p id="confirmMessage">Are you sure?</p>
+      <button id="confirmYes">Yes</button>
+      <button id="confirmNo">No</button>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script type="module" src="modules/auth.js"></script>
+  <script type="module" src="hibachiApp.js"></script>
+</body>
+</html>

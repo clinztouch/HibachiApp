@@ -1,11 +1,12 @@
 import { authFetch } from './api.js';
 import { onHabitChange } from '../hibachiApp.js';
+import { API_BASE } from './config.js'; 
 
 /**
  * Fetch all habits and store them globally.
  */
 export async function fetchHabits() {
-  const res = await authFetch('/api/habits');
+  const res = await authFetch(`${API_BASE}/api/habits`);
   const data = await res.json();
   window.allHabits = data;
   renderHabitList(data);
@@ -16,7 +17,7 @@ export async function fetchHabits() {
  * Mark a habit as completed for a given date.
  */
 export async function markHabitDone(habitId, date) {
-  return authFetch(`/api/habits/${habitId}/completions`, {
+  return authFetch(`${API_BASE}/api/habits/${habitId}/completions`, {
     method: 'POST',
     body: JSON.stringify({ date }),
   });
@@ -26,7 +27,7 @@ export async function markHabitDone(habitId, date) {
  * Remove a completion entry from a habit.
  */
 export async function unmarkHabitDone(habitId, date) {
-  return authFetch(`/api/habits/${habitId}/completions`, {
+  return authFetch(`${API_BASE}/api/habits/${habitId}/completions`, {
     method: 'DELETE',
     body: JSON.stringify({ date }),
   });
@@ -36,7 +37,7 @@ export async function unmarkHabitDone(habitId, date) {
  * Mark a habit as done (alternate single-endpoint approach).
  */
 export async function markHabit(id) {
-  const res = await authFetch(`/api/habits/${id}/mark`, {
+  const res = await authFetch(`${API_BASE}/api/habits/${id}/mark`, {
     method: 'PATCH',
   });
 
@@ -49,7 +50,7 @@ export async function markHabit(id) {
  * Edit a habit’s title and goal.
  */
 export async function editHabit(id, updatedTitle, updatedGoal) {
-  const res = await authFetch(`/api/habits/${id}`, {
+  const res = await authFetch(`${API_BASE}/api/habits/${id}`, {
     method: 'PATCH',
     headers: {
       'Content-Type': 'application/json'
@@ -68,7 +69,7 @@ export async function editHabit(id, updatedTitle, updatedGoal) {
 export async function deleteHabit(id) {
   if (!confirm('Delete this habit?')) return;
 
-  const res = await authFetch(`/api/habits/${id}`, {
+  const res = await authFetch(`${API_BASE}/api/habits/${id}`, {
     method: 'DELETE',
   });
 
@@ -95,9 +96,4 @@ function renderHabitList(habits) {
     `;
     list.appendChild(listItem);
   });
-}
-
-function isHabitDoneToday(habit) {
-  const today = new Date().toISOString().split('T')[0];
-  return habit.completions?.includes(today);
 }

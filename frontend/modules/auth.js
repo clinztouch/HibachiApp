@@ -1,6 +1,8 @@
-import { authFetch } from './api.js';
 
-// 🔔 Toast utility
+import { authFetch } from './api.js';
+import { showSpinner, hideSpinner } from './spinner.js';
+
+// ---------------- Toast Helper ----------------
 function showToast(message, color = '#333') {
   Toastify({
     text: message,
@@ -12,122 +14,156 @@ function showToast(message, color = '#333') {
   }).showToast();
 }
 
-// 🔐 Login Handler
-function handleLogin(onLoginSuccess) {
-  const loginForm = document.getElementById('loginForm');
-  if (!loginForm) return;
+// ---------------- Utility ----------------
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+function isValidEmail(email) {
+  return emailRegex.test(email);
+}
 
-  loginForm.addEventListener('submit', async (e) => {
+function setBtnBusy(btn, busy, idleText, busyText) {
+  if (!btn) return;
+  btn.disabled = busy;
+  btn.textContent = busy ? busyText : idleText;
+}
+
+// ---------------- Login ----------------
+function handleLogin(onSuccess) {
+  const form = document.getElementById('loginForm');
+  if (!form) return;
+
+  const passwordInput = form.querySelector('input[type="password"]');
+  const toggleBtn = document.getElementById('toggleLoginPassword');
+  togglePasswordVisibility(toggleBtn, passwordInput);
+
+  form.addEventListener('submit', async (e) => {
     e.preventDefault();
-
-    const email = e.target.email?.value.trim();
-    const password = e.target.password?.value;
+    const email = form.email?.value.trim();
+    const password = passwordInput?.value;
 
     if (!email || !password) {
       showToast('Please fill in both fields', 'orange');
       return;
     }
+    if (!isValidEmail(email)) {
+      showToast('Invalid email format', 'orange');
+      return;
+    }
 
-    try {
-      const res = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      });
+    const submitBtn = form.querySelector('button[type="submit"]');
+    setBtnBusy(submitBtn, true, 'Login', 'Logging in…');
+    showSpinner();
 
-      const data = await res.json();
+    const { data, error, status } = await authFetch('/api/auth/login', {
+      method: 'POST',
+      body: JSON.stringify({ email, password })
+    });
 
-      if (res.ok) {
-        localStorage.setItem('token', data.token);
-        showToast('Login successful!', 'green');
-        onLoginSuccess();
-      } else {
-        showToast(data.message || 'Login failed', 'red');
-      }
-    } catch (err) {
-      console.error('Login Error:', err);
-      showToast('Network error', 'red');
+    hideSpinner();
+    setBtnBusy(submitBtn, false, 'Login', 'Logging in…');
+
+    if (status === 200) {
+      localStorage.setItem('token', data.token);
+      showToast('Login successful!', 'green');
+      window.location.href = '/dashboard.html'; // auto‑redirect
+      onSuccess?.();
+    } else {
+      showToast(error || 'Login failed', 'red');
     }
   });
 }
 
-// 📝 Register Handler
-function handleRegister(onLoginSuccess) {
-  const registerForm = document.getElementById('registerForm');
-  if (!registerForm) return;
+// ---------------- Register ----------------
+function handleRegister(onSuccess) {
+  const form = document.getElementById('registerForm');
+  if (!form) return;
 
-  registerForm.addEventListener('submit', async (e) => {
+  const passwordInput = form.querySelector('input[type="password"]');
+  const toggleBtn = document.getElementById('toggleRegisterPassword');
+  togglePasswordVisibility(toggleBtn, passwordInput);
+
+  form.addEventListener('submit', async (e) => {
     e.preventDefault();
-
     const email = document.getElementById('registerEmail')?.value.trim();
-    const password = document.getElementById('registerPassword')?.value;
+    const password = passwordInput?.value;
 
     if (!email || !password) {
       showToast('Please fill in both fields', 'orange');
       return;
     }
+    if (!isValidEmail(email)) {
+      showToast('Invalid email format', 'orange');
+      return;
+    }
 
-    try {
-      const res = await fetch('/api/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      });
+    const submitBtn = form.querySelector('button[type="submit"]');
+    setBtnBusy(submitBtn, true, 'Sign Up', 'Signing up…');
+    showSpinner();
 
-      const data = await res.json();
+    const { data, error, status } = await authFetch('/api/auth/register', {
+      method: 'POST',
+      body: JSON.stringify({ email, password })
+    });
 
-      if (!res.ok) {
-        showToast(data.message || 'Registration failed', 'red');
-        return;
-      }
+    hideSpinner();
+    setBtnBusy(submitBtn, false, 'Sign Up', 'Signing up…');
 
+    if (status === 200) {
       localStorage.setItem('token', data.token);
       showToast('Registration successful! Check your email.', 'green');
-      onLoginSuccess();
-    } catch (err) {
-      console.error('Register Error:', err);
-      showToast('Server error', 'red');
+      onSuccess?.();
+    } else {
+      showToast(error || 'Registration failed', 'red');
     }
   });
 }
 
-// 🔁 Resend Verification
+// ---------------- Resend Verification ----------------
 function handleResendVerification() {
-  const resendBtn = document.getElementById('resendBtn');
+  const btn = document.getElementById('resendBtn');
   const emailInput = document.getElementById('registerEmail');
+  if (!btn || !emailInput) return;
 
-  if (!resendBtn || !emailInput) return;
-
-  resendBtn.addEventListener('click', async () => {
+  btn.addEventListener('click', async () => {
     const email = emailInput.value.trim();
     if (!email) {
       showToast('Please enter your email first', 'orange');
       return;
     }
-
-    try {
-      const res = await fetch('/api/auth/resend-verification', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
-      });
-
-      const data = await res.json();
-      showToast(data.message, res.ok ? 'green' : 'red');
-    } catch (err) {
-      console.error('Resend Error:', err);
-      showToast('Something went wrong', 'red');
+    if (!isValidEmail(email)) {
+      showToast('Invalid email format', 'orange');
+      return;
     }
+    setBtnBusy(btn, true, 'Resend', 'Sending…');
+    showSpinner();
+
+    const { data, error, status } = await authFetch('/api/auth/resend-verification', {
+      method: 'POST',
+      body: JSON.stringify({ email })
+    });
+
+    hideSpinner();
+    setBtnBusy(btn, false, 'Resend', 'Sending…');
+    showToast(data?.message || error || 'Request finished', status === 200 ? 'green' : 'red');
   });
 }
 
-// 🚪 Logout
-export function logout() {
-  localStorage.removeItem('token');
-  window.location.reload();
+// ---------------- Password Visibility ----------------
+function togglePasswordVisibility(toggleBtn, pwdInput) {
+  if (!toggleBtn || !pwdInput) return;
+  toggleBtn.addEventListener('click', () => {
+    const hidden = pwdInput.type === 'password';
+    pwdInput.type = hidden ? 'text' : 'password';
+    toggleBtn.textContent = hidden ? '🙈' : '👁️';
+  });
 }
 
-// 📦 Init all handlers
+// ---------------- Logout ----------------
+export function logout() {
+  localStorage.removeItem('token');
+  window.location.href = '/';
+}
+
+// ---------------- Initialiser ----------------
 export function initAuthHandlers(onLoginSuccess) {
   handleLogin(onLoginSuccess);
   handleRegister(onLoginSuccess);

@@ -8,6 +8,7 @@ import { toggleDarkMode, applySavedTheme } from './modules/theme.js';
 import { isTokenExpired } from './modules/authHelpers.js';
 import { showSpinner, hideSpinner } from './modules/utils.js';
 
+
 // ✅ Set base API URL for dev vs production
 const BASE_API_URL = window.location.hostname === 'localhost'
   ? 'http://localhost:5000'
@@ -247,3 +248,14 @@ document.addEventListener('DOMContentLoaded', () => {
   document.documentElement.setAttribute('data-theme', savedTheme);
   document.getElementById('darkModeIcon').textContent = savedTheme === 'dark' ? '🌞' : '🌙';
 });
+
+applySavedTheme();
+
+// spinner.js
+export function showSpinner() {
+  document.getElementById('globalSpinner')?.classList.remove('hidden');
+}
+
+export function hideSpinner() {
+  document.getElementById('globalSpinner')?.classList.add('hidden');
+}
