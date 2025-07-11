@@ -1,0 +1,611 @@
+/* ===== Root Variables ===== */
+:root {
+  --text-light: #333;
+  --text-dark: #e0e0e0;
+
+  --bg-light: linear-gradient(to bottom right, #fdfbfb, #ebedee);
+  --bg-dark: linear-gradient(to bottom right, #1c1c1c, #2a2a2a);
+
+  --card-bg-light: rgba(255, 255, 255, 0.5);
+  --card-bg-dark: rgba(30, 30, 30, 0.6);
+
+  --border-light: #e0e0e0;
+  --border-dark: #444;
+
+  --checkbox-green: #4CAF50;
+  --blue-accent: #2563eb;
+  --green-accent: #22c55e;
+  --red-accent: #f87171;
+
+  --glass-blur: blur(12px);
+}
+
+/* ===== Base Body Styles ===== */
+body {
+  font-family: 'Segoe UI', Arial, sans-serif;
+  margin: 0;
+  padding: 1rem;
+  background: var(--bg-light);
+  color: var(--text-light);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+body.dark-mode {
+  background: var(--bg-dark);
+  color: var(--text-dark);
+}
+
+/* ===== Form Elements ===== */
+button,
+input,
+select {
+  padding: 0.4rem 0.6rem;
+  margin: 0.2rem 0.5rem 0.2rem 0;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1rem;
+  background-color: #f0f0f0;
+  cursor: pointer;
+}
+
+body.dark-mode button,
+body.dark-mode input,
+body.dark-mode select {
+  background-color: #333;
+  color: var(--text-dark);
+  border-color: var(--border-dark);
+}
+
+/* ===== Modal ===== */
+.modal.hidden {
+  display: none;
+}
+
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: white;
+  padding: 1rem 2rem;
+  border-radius: 8px;
+  max-width: 400px;
+  width: 90%;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+body.dark-mode .modal-content {
+  background: #1e1e1e;
+  color: var(--text-dark);
+}
+
+/* ===== Habit List and Cards ===== */
+.habit-list {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+  margin-top: 1rem;
+  padding: 0;
+}
+
+@media (min-width: 768px) {
+  .habit-list {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .habit-list {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.habit-item p {
+  margin: 2px 0;
+}
+
+.habit-item {
+  border: 1px solid #ccc;
+  padding: 10px;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  background: #f9f9f9;
+}
+
+.habit-card {
+  background: var(--card-bg-light);
+  backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--border-light);
+  border-radius: 1rem;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  padding: 1.5rem;
+  margin: 1rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.habit-card:hover {
+  transform: scale(1.02);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.1);
+}
+
+body.dark-mode .habit-card {
+  background: var(--card-bg-dark);
+  border-color: var(--border-dark);
+  color: var(--text-dark);
+}
+
+/* Habit Status */
+.habit-card.completed {
+  border-left: 6px solid var(--green-accent);
+  opacity: 0.8;
+}
+
+.habit-card.urgent {
+  border-left: 6px solid var(--red-accent);
+  animation: urgent-pulse 1.5s infinite alternate;
+}
+
+/* ===== Spinner ===== */
+.spinner {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  width: 40px;
+  height: 40px;
+  margin: -20px 0 0 -20px;
+  border: 4px solid #ccc;
+  border-top: 4px solid #09f;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  z-index: 2000;
+}
+
+.spinner.hidden {
+  display: none;
+}
+
+/* ===== Animations ===== */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes urgent-pulse {
+  0% { transform: scale(1); }
+  100% { transform: scale(1.01); }
+}
+
+.habit-card.adding {
+  animation: fade-scale-in 0.4s ease;
+}
+
+@keyframes fade-scale-in {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.habit-card.removing {
+  animation: fade-slide-out 0.4s ease forwards;
+}
+
+@keyframes fade-slide-out {
+  from { opacity: 1; transform: translateY(0); }
+  to { opacity: 0; transform: translateY(20px); }
+}
+
+/* ===== Checkbox Styles ===== */
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  font-size: 1rem;
+  margin-bottom: 0.75rem;
+  position: relative;
+}
+
+.styled-checkbox {
+  display: none;
+}
+
+.custom-checkbox {
+  width: 20px;
+  height: 20px;
+  border: 2px solid #555;
+  border-radius: 6px;
+  display: inline-block;
+  position: relative;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.styled-checkbox:checked + .custom-checkbox {
+  background-color: var(--checkbox-green);
+  border-color: var(--checkbox-green);
+}
+
+.styled-checkbox:checked + .custom-checkbox::after {
+  content: '';
+  position: absolute;
+  left: 5px;
+  top: 1px;
+  width: 6px;
+  height: 12px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+/* ===== Action Buttons ===== */
+.action-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.edit-habit-btn,
+.delete-habit-btn {
+  cursor: pointer;
+  border: none;
+  padding: 0.4rem 0.75rem;
+  border-radius: 0.5rem;
+  font-weight: bold;
+  color: white;
+  transition: background 0.2s ease;
+}
+
+.edit-habit-btn {
+  background-color: #a5b4fc;
+}
+
+.edit-habit-btn:hover {
+  background-color: #818cf8;
+}
+
+.delete-habit-btn {
+  background-color: #fca5a5;
+}
+
+.delete-habit-btn:hover {
+  background-color: var(--red-accent);
+}
+
+/* ===== Streak Highlighting ===== */
+.streak-current,
+.streak-longest {
+  font-weight: bold;
+  color: var(--blue-accent);
+}
+
+/* ===== Accessibility ===== */
+button:focus,
+input:focus,
+select:focus {
+  outline: 2px solid var(--blue-accent);
+  outline-offset: 2px;
+}
+
+/* ===== Layout Containers ===== */
+.container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+@media (max-width: 768px) {
+  .container {
+    flex-direction: column;
+  }
+
+  .habit-card {
+    width: 100%;
+  }
+
+  .chart {
+    max-width: 100%;
+    height: auto;
+  }
+}
+
+@media (min-width: 768px) {
+  .container {
+    flex-direction: row;
+  }
+}
+
+/* ===== Responsive Form Layout ===== */
+form {
+  display: flex;
+  flex-direction: column;
+}
+
+@media (min-width: 600px) {
+  form {
+    flex-direction: row;
+    gap: 1rem;
+  }
+}
+
+/* ===== Canvas Overrides ===== */
+canvas {
+  width: 100% !important;
+  height: auto !important;
+}
+
+/* ===== Responsive Typography & Layout ===== */
+@media (max-width: 768px) {
+  body {
+    padding: 0.5rem;
+  }
+
+  .habit-card {
+    padding: 1rem;
+    margin: 0.5rem 0;
+  }
+
+  .modal-content {
+    padding: 1rem;
+    max-width: 90%;
+  }
+
+  button,
+  input,
+  select {
+    font-size: 0.95rem;
+  }
+}
+
+@media (max-width: 480px) {
+  body {
+    font-size: 0.95rem;
+  }
+
+  h1, h2 {
+    font-size: 1.25rem;
+  }
+
+  .habit-card {
+    padding: 0.75rem;
+    border-radius: 0.75rem;
+  }
+
+  .action-buttons {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .edit-habit-btn,
+  .delete-habit-btn {
+    width: 100%;
+    font-size: 0.95rem;
+    padding: 0.5rem;
+  }
+
+  .modal-content {
+    width: 95%;
+    padding: 1rem;
+    font-size: 0.95rem;
+  }
+
+  form {
+    width: 100%;
+  }
+
+  button,
+  input,
+  select {
+    width: 100%;
+    font-size: 1rem;
+    padding: 0.5rem;
+  }
+
+  .checkbox-label {
+    font-size: 1rem;
+    gap: 0.4rem;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  body {
+    background-color: #121212;
+    color: #eee;
+  }
+}
+
+/* ===== Login Form ===== */
+.login-container {
+  max-width: 480px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background: var(--card-bg-light);
+  backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--border-light);
+  border-radius: 1rem;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+body.dark-mode .login-container {
+  background: var(--card-bg-dark);
+  border-color: var(--border-dark);
+  color: var(--text-dark);
+}
+
+.login-container h2 {
+  text-align: center;
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+}
+
+.login-container form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.login-container input {
+  width: 100%;
+  padding: 0.6rem;
+  border: 1px solid #ccc;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  background: #fff;
+}
+
+body.dark-mode .login-container input {
+  background: #333;
+  color: var(--text-dark);
+  border-color: var(--border-dark);
+}
+
+.login-container button {
+  padding: 0.75rem;
+  background-color: var(--blue-accent);
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.login-container button:hover {
+  background-color: #1d4ed8;
+}
+
+/* Optional: Link to forgot password */
+.login-container .forgot-link {
+  text-align: right;
+  font-size: 0.9rem;
+  color: var(--blue-accent);
+  text-decoration: none;
+}
+
+.login-container .forgot-link:hover {
+  text-decoration: underline;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .login-container {
+    padding: 1rem;
+    margin: 1rem;
+  }
+
+  .login-container h2 {
+    font-size: 1.25rem;
+  }
+
+  .login-container input,
+  .login-container button {
+    font-size: 0.95rem;
+  }
+}
+
+
+/* ===== Register Form ===== */
+.register-container {
+  max-width: 480px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background: var(--card-bg-light);
+  backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--border-light);
+  border-radius: 1rem;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+body.dark-mode .register-container {
+  background: var(--card-bg-dark);
+  border-color: var(--border-dark);
+  color: var(--text-dark);
+}
+
+.register-container h2 {
+  text-align: center;
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+}
+
+.register-container form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.register-container input {
+  width: 100%;
+  padding: 0.6rem;
+  border: 1px solid #ccc;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  background: #fff;
+}
+
+body.dark-mode .register-container input {
+  background: #333;
+  color: var(--text-dark);
+  border-color: var(--border-dark);
+}
+
+.register-container button {
+  padding: 0.75rem;
+  background-color: var(--blue-accent);
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.register-container button:hover {
+  background-color: #1d4ed8; /* slightly darker blue */
+}
+
+/* Responsive tweaks */
+@media (max-width: 480px) {
+  .register-container {
+    padding: 1rem;
+    margin: 1rem;
+  }
+
+  .register-container h2 {
+    font-size: 1.25rem;
+  }
+
+  .register-container button {
+    font-size: 0.95rem;
+  }
+
+  .register-container input {
+    font-size: 0.95rem;
+  }
+}
+
+/* CSS (optional for smoother transition) */
+:root {
+  --bg-color: white;
+  --text-color: black;
+}
+[data-theme="dark"] {
+  --bg-color: #121212;
+  --text-color: #f5f5f5;
+}
+body {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
