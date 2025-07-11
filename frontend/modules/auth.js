@@ -1,11 +1,9 @@
 // frontend/modules/auth.js
 import { showSpinner, hideSpinner } from './spinner.js';
 import { API_BASE } from './config.js';
+import { isTokenExpired } from './authHelpers.js';
 
-// Get the form element
-const loginForm = document.getElementById('loginForm');
-
-// Optional: toast helper (if Toastify is included globally)
+// Toast helper
 function showToast(msg, color = '#444') {
   Toastify({
     text: msg,
@@ -16,7 +14,11 @@ function showToast(msg, color = '#444') {
   }).showToast();
 }
 
-if (loginForm) {
+// Handles login logic
+export function initLoginHandler() {
+  const loginForm = document.getElementById('loginForm');
+  if (!loginForm) return;
+
   loginForm.addEventListener('submit', async e => {
     e.preventDefault();
 
@@ -53,4 +55,32 @@ if (loginForm) {
       showToast('Something went wrong', 'red');
     }
   });
+}
+
+// App auth logic – show/hide sections based on token
+export function initAuthHandlers(fetchHabitsCallback) {
+  const token = localStorage.getItem('token');
+
+  if (!token || isTokenExpired(token)) {
+    localStorage.removeItem('token');
+    document.getElementById('mainApp').style.display = 'none';
+    document.getElementById('authSection').style.display = 'block';
+    return;
+  }
+
+  document.getElementById('mainApp').style.display = 'block';
+  document.getElementById('authSection').style.display = 'none';
+
+  if (typeof fetchHabitsCallback === 'function') {
+    fetchHabitsCallback();
+  }
+
+  const logoutBtn = document.getElementById('logoutBtn');
+  logoutBtn?.addEventListener('click', logout);
+}
+
+// Logout utility
+export function logout() {
+  localStorage.removeItem('token');
+  location.reload();
 }

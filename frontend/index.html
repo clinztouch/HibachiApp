@@ -8,21 +8,47 @@
   <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-  <!-- Toastify CSS -->
+  <!-- Toastify -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css" />
-
-  <!-- App Styles -->
-  <link rel="stylesheet" href="styles.css" />
-
-  <!-- Toastify JS -->
   <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 
+  <!-- Styles -->
+  <link rel="stylesheet" href="styles.css" />
   <style>
     .hidden { display: none; }
     .dark body { background: #121212; color: #f0f0f0; }
     .dark .modal-content { background: #1e1e1e; color: #fff; }
+    .spinner-overlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+    .spinner {
+      border: 5px solid #f3f3f3;
+      border-top: 5px solid #3498db;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
     button { cursor: pointer; }
-    .spinner { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); }
+    #toggleFormBtn {
+      display: block;
+      margin: 1rem auto;
+    }
+    #resendWrapper {
+      margin-top: 1rem;
+      text-align: center;
+    }
   </style>
 </head>
 
@@ -31,17 +57,15 @@
   <button id="toggleDarkModeBtn" aria-label="Toggle dark mode" style="background: none; border: none; font-size: 1.5rem;">
     <span id="darkModeIcon">🌙</span>
   </button>
-<!-- Global Spinner -->
-<div id="globalSpinner" class="spinner-overlay hidden">
-  <div class="spinner"></div>
-</div>
+
+  <!-- Global Spinner -->
+  <div id="globalSpinner" class="spinner-overlay hidden">
+    <div class="spinner"></div>
+  </div>
 
   <h1>HibachiApp</h1>
 
-  <!-- Spinner -->
-  <div id="spinner" class="spinner hidden">Loading...</div>
-
-  <!-- Authentication Section -->
+  <!-- Auth Section -->
   <div id="authSection">
     <div class="login-container">
       <h2>Login</h2>
@@ -51,23 +75,31 @@
         <a href="/forgotpassword" class="forgot-link">Forgot password?</a>
         <button type="submit">Login</button>
       </form>
+
+      <!-- Resend verification wrapper (visible only during login) -->
+      <div id="resendWrapper" class="hidden">
+        <p>Didn't receive a verification email?</p>
+        <button id="resendBtn" type="button">Resend Verification</button>
+      </div>
     </div>
 
-    <p>Didn't receive an email? <button id="resendBtn">Resend</button></p>
     <p id="loginStatus"></p>
 
-    <div class="register-container">
+    <div class="register-container hidden">
       <h2>Register</h2>
       <form id="registerForm">
         <input type="text" name="username" placeholder="Username" required />
         <input type="email" name="email" id="registerEmail" placeholder="Email" required />
         <input type="password" name="password" placeholder="Password" required />
         <button type="submit">Sign Up</button>
+        <p id="registerMessage"></p>
       </form>
     </div>
+
+    <p><button id="toggleFormBtn">Create an account</button></p>
   </div>
 
-  <!-- Main App UI -->
+  <!-- Main App Section -->
   <div id="mainApp" style="display: none;">
     <button id="logoutBtn">Logout</button>
 
@@ -99,20 +131,18 @@
     <canvas id="streakChart" width="400" height="200"></canvas>
   </div>
 
-  <!-- Edit Habit Modal -->
-  <div id="editHabitModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="editHabitTitle">
-    <div class="modal-content" tabindex="-1">
-      <h2 id="editHabitTitle">Edit Habit</h2>
+  <!-- Modals -->
+  <div id="editHabitModal" class="modal hidden" role="dialog" aria-modal="true">
+    <div class="modal-content">
+      <h2>Edit Habit</h2>
       <form id="editHabitForm">
         <label for="habitName">Habit Name</label>
         <input type="text" id="habitName" name="habitName" required />
-
         <label for="habitFrequency">Frequency</label>
         <select id="habitFrequency" name="habitFrequency">
           <option value="daily">Daily</option>
           <option value="weekly">Weekly</option>
         </select>
-
         <div class="modal-actions">
           <button type="submit">Save</button>
           <button type="button" id="cancelEdit">Cancel</button>
@@ -121,7 +151,6 @@
     </div>
   </div>
 
-  <!-- Confirm Modal -->
   <div id="confirmModal" class="modal hidden">
     <div class="modal-content">
       <p id="confirmMessage">Are you sure?</p>
@@ -133,5 +162,31 @@
   <!-- Scripts -->
   <script type="module" src="modules/auth.js"></script>
   <script type="module" src="hibachiApp.js"></script>
+
+  <!-- Toggle Login/Register Script -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const toggleBtn = document.getElementById('toggleFormBtn');
+      const loginContainer = document.querySelector('.login-container');
+      const registerContainer = document.querySelector('.register-container');
+      const resendWrapper = document.getElementById('resendWrapper');
+
+      toggleBtn?.addEventListener('click', () => {
+        const isLoginVisible = !loginContainer.classList.contains('hidden');
+        loginContainer.classList.toggle('hidden', isLoginVisible);
+        registerContainer.classList.toggle('hidden', !isLoginVisible);
+        toggleBtn.textContent = isLoginVisible ? 'Create an account' : 'Switch to Login';
+
+        if (resendWrapper) {
+          resendWrapper.style.display = isLoginVisible ? 'block' : 'none';
+        }
+      });
+
+      // Show resend wrapper if login is initially visible
+      if (!loginContainer.classList.contains('hidden') && resendWrapper) {
+        resendWrapper.style.display = 'block';
+      }
+    });
+  </script>
 </body>
 </html>

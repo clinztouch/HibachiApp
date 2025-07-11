@@ -6,7 +6,9 @@ import { renderChartForHabit, renderStreakChartForHabit } from './modules/chart.
 import { openEditModal, closeEditModal, submitEditForm } from './modules/modal.js';
 import { toggleDarkMode, applySavedTheme } from './modules/theme.js';
 import { isTokenExpired } from './modules/authHelpers.js';
-import { showSpinner, hideSpinner } from './modules/utils.js';
+import { showSpinner, hideSpinner } from './modules/spinner.js';
+
+
 
 
 // ✅ Set base API URL for dev vs production
@@ -173,35 +175,55 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('registerForm')?.addEventListener('submit', async (e) => {
     e.preventDefault();
     showSpinner();
-
-    const username = e.target.username.value.trim();
-    const email = e.target.email.value.trim();
-    const password = e.target.password.value;
+  
+    const username  = e.target.username.value.trim();
+    const email     = e.target.email.value.trim();
+    const password  = e.target.password.value;
     const messageEl = document.getElementById('registerMessage');
-
+  
     if (messageEl) {
       messageEl.textContent = 'Creating account...';
       messageEl.style.color = 'black';
     }
-
+  
     try {
       const res = await fetch(`${BASE_API_URL}/api/auth/register`, {
-        method: 'POST',
+        method : 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, email, password })
+        body   : JSON.stringify({ username, email, password })
       });
-
+  
       const data = await res.json();
-
+  
       if (!res.ok) {
         messageEl.textContent = data.message || 'Registration failed';
         messageEl.style.color = 'red';
         return;
       }
-
-      messageEl.textContent = '✅ Please check your email to verify your account before logging in.';
+  
+      // ✅ SUCCESS — show notice & switch to login view
+      messageEl.textContent = '✅ Registration successful! Redirecting to login...';
       messageEl.style.color = 'green';
       e.target.reset();
+  
+      // Switch forms after a short delay
+      setTimeout(() => {
+        // Containers
+        const loginContainer    = document.querySelector('.login-container');
+        const registerContainer = document.querySelector('.register-container');
+        const toggleBtn         = document.getElementById('toggleFormBtn');
+        const resendWrapper     = document.getElementById('resendWrapper');
+  
+        // Hide register, show login
+        registerContainer.classList.add('hidden');
+        loginContainer.classList.remove('hidden');
+  
+        // Update toggle‑button text
+        if (toggleBtn) toggleBtn.textContent = 'Switch to Register';
+  
+        // Optionally show resend‑verification prompt
+        if (resendWrapper) resendWrapper.style.display = 'block';
+      }, 3000);
     } catch (err) {
       messageEl.textContent = 'Server error. Please try again.';
       messageEl.style.color = 'red';
@@ -209,6 +231,7 @@ document.addEventListener('DOMContentLoaded', () => {
       hideSpinner();
     }
   });
+  
 
   // Resend Verification
   document.getElementById('resendBtn')?.addEventListener('click', async () => {
@@ -251,11 +274,3 @@ document.addEventListener('DOMContentLoaded', () => {
 
 applySavedTheme();
 
-// spinner.js
-export function showSpinner() {
-  document.getElementById('globalSpinner')?.classList.remove('hidden');
-}
-
-export function hideSpinner() {
-  document.getElementById('globalSpinner')?.classList.add('hidden');
-}

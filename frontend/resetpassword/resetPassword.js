@@ -1,23 +1,29 @@
+// scripts/resetPassword.js
 import { API_BASE } from '../modules/config.js';
 
 document.addEventListener('DOMContentLoaded', () => {
   const form = document.getElementById('resetForm');
   const messageEl = document.getElementById('message');
 
+  // Extract token from URL
   const params = new URLSearchParams(window.location.search);
   const token = params.get('token');
 
   if (!token) {
-    messageEl.textContent = 'Invalid reset link.';
+    messageEl.textContent = 'Invalid or missing reset token.';
+    messageEl.style.color = 'red';
+    form.style.display = 'none';
     return;
   }
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
+
     const password = document.getElementById('newPassword').value.trim();
 
     if (!password) {
       messageEl.textContent = 'Password is required.';
+      messageEl.style.color = 'red';
       return;
     }
 
@@ -31,7 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const data = await res.json();
 
       if (!res.ok) {
-        messageEl.textContent = data.message || 'Reset failed';
+        messageEl.textContent = data.message || 'Reset failed.';
         messageEl.style.color = 'red';
         return;
       }
@@ -40,16 +46,23 @@ document.addEventListener('DOMContentLoaded', () => {
         text: "✅ Password reset successful!",
         duration: 4000,
         gravity: "top",
-        backgroundColor: "#4CAF50"
+        position: "right",
+        backgroundColor: "#4CAF50",
       }).showToast();
 
       messageEl.textContent = 'Success! You can now log in.';
       messageEl.style.color = 'green';
       form.reset();
+
+      // Optional: redirect to login after a delay
+      setTimeout(() => {
+        window.location.href = '/';
+      }, 3000);
+
     } catch (err) {
       messageEl.textContent = 'Something went wrong.';
       messageEl.style.color = 'red';
-      console.error(err);
+      console.error('Reset error:', err);
     }
   });
 });

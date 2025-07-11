@@ -639,3 +639,84 @@ body {
     transform: rotate(360deg);
   }
 }
+
+#resendBtn {
+  background-color: #007bff;     /* Bootstrap-style blue */
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  margin-left: 0.5rem;
+}
+
+#resendBtn:hover {
+  background-color: #0056b3;
+}
+
+#toggleFormBtn {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+#toggleFormBtn:hover {
+  background-color: #0056b3;
+}
+
+.center-toggle-btn {
+  text-align: center;
+  margin-top: 1rem;
+}
+
+.center-toggle-btn button {
+  background: #3498db;
+  color: #fff;
+  padding: 0.5rem 1.25rem;
+  border: none;
+  border-radius: 5px;
+  font-size: 1rem;
+  transition: background 0.3s ease;
+}
+
+.center-toggle-btn button:hover {
+  background: #2980b9;
+}
+
+#resendWrapper {
+  display: none;
+  text-align: center;
+  margin-top: 1rem;
+}
+
+.form-toggle-wrapper {
+  text-align: center;
+  margin-top: 1rem;
+}
+
+#resendWrapper {
+  text-align: center;
+  margin: 1rem 0;
+}
+
+#toggleFormBtn,
+#resendBtn {
+  background-color: #3498db;
+  border: none;
+  padding: 0.5rem 1rem;
+  color: white;
+  border-radius: 5px;
+  font-size: 1rem;
+}
+
+#toggleFormBtn:hover,
+#resendBtn:hover {
+  background-color: #2980b9;
+}

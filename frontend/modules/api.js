@@ -1,27 +1,22 @@
-// modules/api.js
 import { isTokenExpired } from './authHelpers.js';
-import { API_BASE } from '../config.js';          // ← ADD THIS
+import { API_BASE } from './config.js';
 
 /**
- * Auth‑aware fetch that auto‑prefixes API_BASE when you pass a relative path.
- * @param {string} urlOrPath – '/api/habits'  OR  'https://…/api/habits'
- * @param {object} options – fetch options (method, headers, body, etc.)
- * @returns {Promise<{ data:any, error:string|null, status:number }>}
+ * Performs an authenticated fetch request.
+ * Automatically appends the API base URL and handles token expiry.
+ *
+ * @param {string} urlOrPath - Relative path (e.g., "/api/habits") or full URL
+ * @param {object} options - fetch options (method, headers, body, etc.)
+ * @returns {Promise<{ data: any, error: string | null, status: number }>}
  */
 export async function authFetch(urlOrPath, options = {}) {
-  // ▶ 1. Build the final URL
-  const url = urlOrPath.startsWith('http')
-    ? urlOrPath
-    : `${API_BASE}${urlOrPath}`;
+  const url = urlOrPath.startsWith('http') ? urlOrPath : `${API_BASE}${urlOrPath}`;
 
-  // ▶ 2. Token check
   const token = localStorage.getItem('token');
   if (!token || isTokenExpired(token)) {
-    handleExpiredToken();
-    return { data: null, error: 'Session expired', status: 401 };
+    return handleExpiredSession();
   }
 
-  // ▶ 3. Headers
   const headers = {
     'Content-Type': 'application/json',
     Authorization: `Bearer ${token}`,
@@ -29,37 +24,37 @@ export async function authFetch(urlOrPath, options = {}) {
   };
 
   try {
-    const response = await fetch(url, { ...options, headers });
+    const res = await fetch(url, { ...options, headers });
+    const contentType = res.headers.get('content-type');
+    const isJson = contentType && contentType.includes('application/json');
+    const body = isJson ? await res.json() : await res.text();
 
-    // ▶ 4. Parse JSON when available
-    const isJSON = response.headers
-      .get('content-type')
-      ?.includes('application/json');
-    const body = isJSON ? await response.json() : await response.text();
-
-    // ▶ 5. Error handling
-    if (!response.ok) {
-      if (response.status === 401 || response.status === 403) {
-        handleExpiredToken();
-      }
+    if (!res.ok) {
+      if ([401, 403].includes(res.status)) handleExpiredToken();
       return {
         data: null,
         error: body?.message || body || 'Request failed',
-        status: response.status
+        status: res.status
       };
     }
 
-    return { data: body, error: null, status: response.status };
+    return { data: body, error: null, status: res.status };
   } catch (err) {
-    return { data: null, error: err.message || 'Fetch failed', status: 500 };
+    return {
+      data: null,
+      error: err.message || 'Network error',
+      status: 500
+    };
   }
 }
 
 /**
- * Clears token and reloads page on expired session.
+ * Handles session expiration: removes token and refreshes the page.
+ * @returns error response to caller
  */
-function handleExpiredToken() {
+function handleExpiredSession() {
   localStorage.removeItem('token');
   alert('Session expired. Please log in again.');
   window.location.reload();
+  return { data: null, error: 'Session expired', status: 401 };
 }
