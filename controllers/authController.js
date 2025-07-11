@@ -3,9 +3,9 @@ import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 import User from '../models/User.js';
 import {
-     sendVerificationEmail,
-      sendPasswordResetEmail 
-    } from '../modules/email.js';
+  sendVerificationEmail,
+  sendPasswordResetEmail
+} from '../modules/utils/email.js';
 
 
 // REGISTER
