@@ -2,7 +2,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 import express from 'express';
-import cors from 'cors';
+// import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -20,10 +20,13 @@ connectDB();
 const app = express();
 
 // Middleware
+import cors from 'cors';
+
 app.use(cors({
-  origin: ['http://localhost:8888', 'https://frolicking-sunburst-228e7b.netlify.app'],
-  credentials: true, // Only if you're using cookies or auth headers
+  origin: ['http://localhost:5500', 'https://frolicking-sunburst-228e7b.netlify.app'],
+  credentials: true
 }));
+
 
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'frontend'))); 
