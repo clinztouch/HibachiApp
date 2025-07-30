@@ -23,10 +23,13 @@ const app = express();
 import cors from 'cors';
 
 app.use(cors({
-  origin: ['http://localhost:5500', 'https://frolicking-sunburst-228e7b.netlify.app'],
+  origin: [
+    'http://localhost:5500',
+    'https://frolicking-sunburst-228e7b.netlify.app',
+    'https://hibachiapp.onrender.com' // ✅ Add this
+  ],
   credentials: true
 }));
-
 
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'frontend'))); 
