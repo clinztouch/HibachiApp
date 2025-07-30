@@ -8,20 +8,15 @@ import { toggleDarkMode, applySavedTheme } from './modules/theme.js';
 import { isTokenExpired } from './modules/authHelpers.js';
 import { showSpinner, hideSpinner } from './modules/spinner.js';
 
-
-
-
 // ✅ Set base API URL for dev vs production
 const BASE_API_URL = window.location.hostname === 'localhost'
   ? 'http://localhost:5000'
   : 'https://hibachiapp.onrender.com';
 
-// Exported stateful variables
 export let currentEditingHabitId = null;
 export let lastFocusedElement = null;
 export let trap = null;
 
-// Toast helper
 function showToast(message, success = true) {
   Toastify({
     text: message,
@@ -127,150 +122,4 @@ async function initializeApp() {
 
 document.addEventListener('DOMContentLoaded', () => {
   initializeApp();
-
-  // Habit Form Submit
-  document.getElementById('habitForm')?.addEventListener('submit', async (e) => {
-    e.preventDefault();
-
-    const title = e.target.title.value.trim();
-    const goal = e.target.description.value.trim();
-    const token = localStorage.getItem('token');
-    const spinner = document.getElementById('spinner');
-
-    if (!title || !goal) {
-      showToast('Please fill in both title and goal.', false);
-      return;
-    }
-
-    spinner.style.display = 'block';
-
-    try {
-      const res = await fetch(`${BASE_API_URL}/api/habits`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify({ title, goal })
-      });
-
-      const data = await res.json();
-
-      if (res.ok) {
-        showToast('New habit added!');
-        await fetchHabits();
-        e.target.reset();
-      } else {
-        showToast(data.message || 'Error creating habit.', false);
-      }
-    } catch (err) {
-      showToast('Something went wrong', false);
-      console.error(err);
-    } finally {
-      spinner.style.display = 'none';
-    }
-  });
-
-  // Register Form Submit
-  document.getElementById('registerForm')?.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    showSpinner();
-  
-    const username  = e.target.username.value.trim();
-    const email     = e.target.email.value.trim();
-    const password  = e.target.password.value;
-    const messageEl = document.getElementById('registerMessage');
-  
-    if (messageEl) {
-      messageEl.textContent = 'Creating account...';
-      messageEl.style.color = 'black';
-    }
-  
-    try {
-      const res = await fetch(`${BASE_API_URL}/api/auth/register`, {
-        method : 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body   : JSON.stringify({ username, email, password })
-      });
-  
-      const data = await res.json();
-  
-      if (!res.ok) {
-        messageEl.textContent = data.message || 'Registration failed';
-        messageEl.style.color = 'red';
-        return;
-      }
-  
-      // ✅ SUCCESS — show notice & switch to login view
-      messageEl.textContent = '✅ Registration successful! Redirecting to login...';
-      messageEl.style.color = 'green';
-      e.target.reset();
-  
-      // Switch forms after a short delay
-      setTimeout(() => {
-        // Containers
-        const loginContainer    = document.querySelector('.login-container');
-        const registerContainer = document.querySelector('.register-container');
-        const toggleBtn         = document.getElementById('toggleFormBtn');
-        const resendWrapper     = document.getElementById('resendWrapper');
-  
-        // Hide register, show login
-        registerContainer.classList.add('hidden');
-        loginContainer.classList.remove('hidden');
-  
-        // Update toggle‑button text
-        if (toggleBtn) toggleBtn.textContent = 'Switch to Register';
-  
-        // Optionally show resend‑verification prompt
-        if (resendWrapper) resendWrapper.style.display = 'block';
-      }, 3000);
-    } catch (err) {
-      messageEl.textContent = 'Server error. Please try again.';
-      messageEl.style.color = 'red';
-    } finally {
-      hideSpinner();
-    }
-  });
-  
-
-  // Resend Verification
-  document.getElementById('resendBtn')?.addEventListener('click', async () => {
-    const email = prompt('Enter your email to resend verification:');
-    if (!email) return;
-
-    try {
-      const res = await fetch(`${BASE_API_URL}/api/auth/resend`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email })
-      });
-
-      const data = await res.json();
-      showToast(data.message || 'Check your email', res.ok);
-    } catch (err) {
-      showToast('Failed to resend verification. Try again later.', false);
-      console.error(err);
-    }
-  });
-
-  // Theme toggle
-  const themeBtn = document.getElementById('toggleDarkModeBtn');
-  themeBtn?.addEventListener('click', () => {
-    const currentTheme = document.documentElement.getAttribute('data-theme');
-    const isDark = currentTheme === 'dark';
-    const newTheme = isDark ? 'light' : 'dark';
-
-    document.documentElement.setAttribute('data-theme', newTheme);
-    localStorage.setItem('theme', newTheme);
-
-    document.getElementById('darkModeIcon').textContent = newTheme === 'dark' ? '🌞' : '🌙';
-  });
-
-  // Apply saved theme on load
-  const savedTheme = localStorage.getItem('theme') || 'light';
-  document.documentElement.setAttribute('data-theme', savedTheme);
-  document.getElementById('darkModeIcon').textContent = savedTheme === 'dark' ? '🌞' : '🌙';
 });
-
-applySavedTheme();
-

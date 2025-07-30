@@ -1,98 +1,96 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HibachiApp</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>HibachiApp</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 2rem;
+      background-color: #f7f7f7;
+    }
+    .habit-card {
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      max-width: 500px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.05);
+    }
+    .progress-bar {
+      background: #eee;
+      border-radius: 5px;
+      overflow: hidden;
+      height: 20px;
+      margin-top: 5px;
+    }
+    .progress-fill {
+      height: 100%;
+      background: #4caf50;
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+    .habit-title {
+      font-size: 1.2em;
+      font-weight: bold;
+    }
+  </style>
 </head>
 <body>
-    <style>
-        body {
-          font-family: Arial, sans-serif;
-          padding: 2rem;
-          background-color: #f7f7f7;
-        }
-        .habit-card {
-          background: white;
-          border: 1px solid #ddd;
-          border-radius: 10px;
-          padding: 1rem;
-          margin-bottom: 1rem;
-          max-width: 500px;
-          box-shadow: 0 0 5px rgba(0,0,0,0.05);
-        }
-        .progress-bar {
-          background: #eee;
-          border-radius: 5px;
-          overflow: hidden;
-          height: 20px;
-          margin-top: 5px;
-        }
-        .progress-fill {
-          height: 100%;
-          background: #4caf50;
-          width: 0%;
-          transition: width 0.3s ease;
-        }
-        .habit-title {
-          font-size: 1.2em;
-          font-weight: bold;
-        }
-      </style>
-    </head>
-    <body>
-    
-      <h1>My Habit Progress</h1>
-      <div id="habit-list"></div>
-    
-      <script>
-        async function loadHabits() {
-          const token = localStorage.getItem('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ODFlNzg5NDI4YTBkMmRlYzRhMWU1OWYiLCJpYXQiOjE3NDY4Mjc0MTcsImV4cCI6MTc0NzQzMjIxN30.er3LJn3dsEOb8FLaqZgjv5WS_XDXgwYUgneW1Y3dsf8'); // Ensure token is set during login
-    
-          if (!token) {
-            alert('No token found. Please log in.');
-            return;
+
+  <h1>My Habit Progress</h1>
+  <div id="habit-list"></div>
+
+  <script>
+    async function loadHabits() {
+      const token = localStorage.getItem('token'); 
+
+      if (!token) {
+        alert('No token found. Please log in.');
+        return;
+      }
+
+      try {
+        const res = await fetch('https://hibachi-backend.onrender.com/api/habits', {
+          headers: {
+            'Authorization': 'Bearer ' + token 
           }
-    
-          try {
-            const res = await fetch('http://localhost:5000/api/habits', {
-              headers: {
-                'Authorization': 'Bearer ' + eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ODFlNzg5NDI4YTBkMmRlYzRhMWU1OWYiLCJpYXQiOjE3NDY4Mjc0MTcsImV4cCI6MTc0NzQzMjIxN30.er3LJn3dsEOb8FLaqZgjv5WS_XDXgwYUgneW1Y3dsf8
-              }
-            });
-    
-            if (!res.ok) throw new Error('Failed to fetch habits');
-    
-            const habits = await res.json();
-            const container = document.getElementById('habit-list');
-            container.innerHTML = '';
-    
-            habits.forEach(habit => {
-              const completion = habit.progressStats?.completionRate || 0;
-    
-              const card = document.createElement('div');
-              card.className = 'habit-card';
-    
-              card.innerHTML = `
-                <div class="habit-title">${habit.title}</div>
-                <p>${habit.description}</p>
-                <p>Streak: <strong>${habit.progressStats?.streak || 0}</strong> days</p>
-                <p>Completed: <strong>${habit.progressStats?.completedDays || 0}</strong> / ${habit.progressStats?.totalDays || 0}</p>
-                <div class="progress-bar">
-                  <div class="progress-fill" style="width: ${completion}%;"></div>
-                </div>
-              `;
-    
-              container.appendChild(card);
-            });
-    
-          } catch (error) {
-            console.error('Error loading habits:', error);
-            alert('Could not load habits.');
-          }
-        }
-    
-        loadHabits();
-      </script>
+        });
+
+        if (!res.ok) throw new Error('Failed to fetch habits');
+
+        const habits = await res.json();
+        const container = document.getElementById('habit-list');
+        container.innerHTML = '';
+
+        habits.forEach(habit => {
+          const completion = habit.progressStats?.completionRate || 0;
+
+          const card = document.createElement('div');
+          card.className = 'habit-card';
+
+          card.innerHTML = `
+            <div class="habit-title">${habit.title}</div>
+            <p>${habit.description}</p>
+            <p>Streak: <strong>${habit.progressStats?.streak || 0}</strong> days</p>
+            <p>Completed: <strong>${habit.progressStats?.completedDays || 0}</strong> / ${habit.progressStats?.totalDays || 0}</p>
+            <div class="progress-bar">
+              <div class="progress-fill" style="width: ${completion}%;"></div>
+            </div>
+          `;
+
+          container.appendChild(card);
+        });
+
+      } catch (error) {
+        console.error('Error loading habits:', error);
+        alert('Could not load habits.');
+      }
+    }
+
+    loadHabits();
+  </script>
 </body>
 </html>

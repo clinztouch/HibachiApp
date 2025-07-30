@@ -193,6 +193,61 @@
         resendWrapper.style.display = 'block';
       }
     });
+
+ 
+  document.addEventListener('DOMContentLoaded', () => {
+    const loginForm = document.getElementById('loginForm');
+
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const email = loginForm.email.value;
+      const password = loginForm.password.value;
+
+      // Show spinner
+      document.getElementById('globalSpinner').classList.remove('hidden');
+
+      try {
+        const res = await fetch('https://hibachi-backend.onrender.com/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password }),
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+          // ✅ Save token
+          localStorage.setItem('token', data.token);
+
+          // ✅ Redirect to dashboard.html
+          window.location.href = 'dashboard.html';
+        } else {
+          Toastify({
+            text: data.message || 'Login failed',
+            duration: 3000,
+            gravity: 'top',
+            position: 'center',
+            backgroundColor: '#e74c3c'
+          }).showToast();
+        }
+      } catch (error) {
+        console.error('Login error:', error);
+        Toastify({
+          text: 'Something went wrong during login.',
+          duration: 3000,
+          gravity: 'top',
+          position: 'center',
+          backgroundColor: '#e67e22'
+        }).showToast();
+      } finally {
+        // Hide spinner
+        document.getElementById('globalSpinner').classList.add('hidden');
+      }
+    });
+  });
+
+
   </script>  
 </body>
 </html>

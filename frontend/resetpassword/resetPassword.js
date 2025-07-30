@@ -28,6 +28,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     try {
+      form.querySelector('button').disabled = true;
+
       const res = await fetch(`${API_BASE}/api/auth/reset-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -41,6 +43,11 @@ document.addEventListener('DOMContentLoaded', () => {
         messageEl.style.color = 'red';
         return;
       }
+      if (password.length < 8) {
+        messageEl.textContent = 'Password must be at least 8 characters.';
+        messageEl.style.color = 'red';
+        return;
+      }      
 
       Toastify({
         text: "✅ Password reset successful!",
@@ -63,6 +70,26 @@ document.addEventListener('DOMContentLoaded', () => {
       messageEl.textContent = 'Something went wrong.';
       messageEl.style.color = 'red';
       console.error('Reset error:', err);
+    } finally {
+      form.querySelector('button').disabled = false;
     }
   });
+
+if (!res.ok) {
+  const errorMsg = data?.message || 'Reset failed.';
+  Toastify({
+    text: `❌ ${errorMsg}`,
+    duration: 4000,
+    gravity: "top",
+    position: "right",
+    backgroundColor: "#e74c3c",
+  }).showToast();
+
+  messageEl.textContent = errorMsg;
+  messageEl.style.color = 'red';
+  return;
+}
+if (data.message && data.message.toLowerCase().includes('expired')) {
+  messageEl.innerHTML = 'Reset link expired. <a href="/forgot-password">Request a new one</a>.';
+}
 });
