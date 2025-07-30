@@ -27,6 +27,12 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
+    if (password.length < 8) {
+      messageEl.textContent = 'Password must be at least 8 characters.';
+      messageEl.style.color = 'red';
+      return;
+    }
+
     try {
       form.querySelector('button').disabled = true;
 
@@ -39,29 +45,44 @@ document.addEventListener('DOMContentLoaded', () => {
       const data = await res.json();
 
       if (!res.ok) {
-        messageEl.textContent = data.message || 'Reset failed.';
+        const errorMsg = data?.message || 'Reset failed.';
+
+        Toastify({
+          text: `❌ ${errorMsg}`,
+          duration: 4000,
+          gravity: 'top',
+          position: 'right',
+          style: {
+            background: '#e74c3c'
+          }
+        }).showToast();
+
+        if (errorMsg.toLowerCase().includes('expired')) {
+          messageEl.innerHTML = 'Reset link expired. <a href="/forgot-password">Request a new one</a>.';
+        } else {
+          messageEl.textContent = errorMsg;
+        }
+
         messageEl.style.color = 'red';
         return;
       }
-      if (password.length < 8) {
-        messageEl.textContent = 'Password must be at least 8 characters.';
-        messageEl.style.color = 'red';
-        return;
-      }      
 
+      // Success
       Toastify({
-        text: "✅ Password reset successful!",
+        text: '✅ Password reset successful!',
         duration: 4000,
-        gravity: "top",
-        position: "right",
-        backgroundColor: "#4CAF50",
+        gravity: 'top',
+        position: 'right',
+        style: {
+          background: '#4CAF50'
+        }
       }).showToast();
 
       messageEl.textContent = 'Success! You can now log in.';
       messageEl.style.color = 'green';
       form.reset();
 
-      // Optional: redirect to login after a delay
+      // Redirect to login
       setTimeout(() => {
         window.location.href = '/';
       }, 3000);
@@ -74,22 +95,4 @@ document.addEventListener('DOMContentLoaded', () => {
       form.querySelector('button').disabled = false;
     }
   });
-
-if (!res.ok) {
-  const errorMsg = data?.message || 'Reset failed.';
-  Toastify({
-    text: `❌ ${errorMsg}`,
-    duration: 4000,
-    gravity: "top",
-    position: "right",
-    backgroundColor: "#e74c3c",
-  }).showToast();
-
-  messageEl.textContent = errorMsg;
-  messageEl.style.color = 'red';
-  return;
-}
-if (data.message && data.message.toLowerCase().includes('expired')) {
-  messageEl.innerHTML = 'Reset link expired. <a href="/forgot-password">Request a new one</a>.';
-}
 });
